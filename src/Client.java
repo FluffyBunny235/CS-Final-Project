@@ -3,9 +3,9 @@ import java.net.Socket;
 import java.util.Scanner;
 
 public class Client {
-    private Socket socket;
-    private BufferedWriter bufferedWriter;
-    private BufferedReader bufferedReader;
+    public Socket socket;
+    public BufferedWriter bufferedWriter;
+    public BufferedReader bufferedReader;
     private String username;
 
     public Client(Socket socket, String username) {
@@ -18,19 +18,20 @@ public class Client {
             closeEverything(socket, bufferedReader, bufferedWriter);
         }
     }
-    public void sendMessage() {
-        try {
-            bufferedWriter.write(username);
+    public void sendMessage(String message, char character) {
+        try{
+            bufferedWriter.write(username + " " + character + ":" + message);
             bufferedWriter.newLine();
             bufferedWriter.flush();
-
-            Scanner scanner = new Scanner(System.in);
-            while (socket.isConnected()) {
-                String messageToSend = scanner.nextLine();
-                bufferedWriter.write(username + ": " + messageToSend);
-                bufferedWriter.newLine();
-                bufferedWriter.flush();
-            }
+        } catch( IOException e) {
+            closeEverything(socket, bufferedReader, bufferedWriter);
+        }
+    }
+    public void startMessage(char character) {
+        try {
+            bufferedWriter.write(username + " " +character);
+            bufferedWriter.newLine();
+            bufferedWriter.flush();
         } catch( IOException e) {
             closeEverything(socket, bufferedReader, bufferedWriter);
         }
@@ -43,7 +44,7 @@ public class Client {
                 while (socket.isConnected()) {
                     try {
                         messageFromChat = bufferedReader.readLine();
-                        System.out.println(messageFromChat);
+                        Game.commands.addLast(messageFromChat);
                     } catch (IOException e) {
                         closeEverything(socket, bufferedReader, bufferedWriter);
                     }
@@ -65,14 +66,5 @@ public class Client {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-    public static void main(String[] args) throws IOException {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter a username: ");
-        String username = scanner.nextLine();
-        Socket socket = new Socket("localhost", 1234);
-        Client client = new Client(socket, username);
-        client.listenForMessage();
-        client.sendMessage();
     }
 }

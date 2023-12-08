@@ -1,3 +1,70 @@
+import java.io.IOException;
+import java.net.Socket;
+import java.util.*;
+
 public class Game {
-    
+//floor is at 590
+//jump 90 pixel minimum
+    public static HashSet<Bullet> bullets = new HashSet<>();
+    public static HashMap<String, Player> players = new HashMap<>();
+    public static ArrayDeque<String> commands = new ArrayDeque<>();
+    public static Client client;
+    public static Player user;
+    public static void main(String[] args) throws IOException {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter a username: ");
+        String username = scanner.nextLine();
+        System.out.println("Which character do you want to be?");
+        char character = scanner.nextLine().toUpperCase().charAt(0);
+        Socket socket = new Socket("localhost", 1452);
+        client = new Client(socket, username);
+        client.listenForMessage();
+        client.startMessage(character);
+        user = new Player(0,0,character, username);
+        players.put(username, user);
+        runCommand();
+    }
+    public static void runFrame(char input) {
+        for (Bullet b : bullets) {
+            b.move();
+        }
+        for (Map.Entry<String, Player> e : Game.players.entrySet()) {
+            e.getValue().move();
+        }
+        if (input == 'd') {user.right();}
+        else if (input == 'a') {user.left();}
+        else if (input == 'w') {user.jump();}
+    }
+    public static void runCommand() {
+        new Thread(new Runnable(){
+            @Override
+            public void run() {
+                while (client.socket.isConnected()) {
+                    if (commands.isEmpty()) {continue;}
+                    String command = commands.removeFirst();
+                    if (command.endsWith("d")) { //move right
+                        players.get(command.substring(0, command.indexOf(" "))).right();
+                    }
+                    else if (command.endsWith("a")) { //move left
+                        players.get(command.substring(0, command.indexOf(" "))).left();
+                    }
+                    else if (command.endsWith("w")) { //jump
+                        players.get(command.substring(0, command.indexOf(" "))).jump();
+                    }
+                    else if (command.endsWith("r")) { //shoot radians
+                        players.get(command.substring(0, command.indexOf(" "))).shoot(Double.parseDouble(command.substring(command.indexOf(" ")+1, command.length()-1)));
+                    }
+                }
+            }
+        }).start();
+    }
+    public static boolean inObstacle(int xLeft, int xRight, int yLow, int yHigh) {
+        if ((xRight > 189 && yLow < 430 && xRight < 261) || (xLeft < 261 && xLeft > 189 && yLow < 430)) { //in tall box
+            return true;
+        }
+        if (xLeft < 333 && xLeft > 261 && yLow < 506) { //in small box
+            return true;
+        }
+        return false;
+    }
 }
