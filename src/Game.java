@@ -20,20 +20,18 @@ public class Game {
         client = new Client(socket, username);
         client.listenForMessage();
         client.startMessage(character);
-        user = new Player(0,0,character, username);
+        user = new Player(500,350,character, username);
         players.put(username, user);
         runCommand();
+        new GUI();
     }
-    public static void runFrame(char input) {
+    public static void runFrame() {
         for (Bullet b : bullets) {
             b.move();
         }
         for (Map.Entry<String, Player> e : Game.players.entrySet()) {
             e.getValue().move();
         }
-        if (input == 'd') {user.right();}
-        else if (input == 'a') {user.left();}
-        else if (input == 'w') {user.jump();}
     }
     public static void runCommand() {
         new Thread(new Runnable(){
@@ -42,7 +40,11 @@ public class Game {
                 while (client.socket.isConnected()) {
                     if (commands.isEmpty()) {continue;}
                     String command = commands.removeFirst();
-                    if (command.endsWith("d")) { //move right
+                    if (command.startsWith("new")) {
+                        String[] words = command.split(" ");
+                        players.put(words[1], new Player(500, 350, words[2].charAt(0), words[1]));
+                    }
+                    else if (command.endsWith("d")) { //move right
                         players.get(command.substring(0, command.indexOf(" "))).right();
                     }
                     else if (command.endsWith("a")) { //move left

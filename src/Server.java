@@ -1,4 +1,4 @@
-//Server, Client, and Client Handler are all copied from 
+//Server, Client, and Client Handler are all modified from
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;

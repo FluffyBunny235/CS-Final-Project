@@ -7,7 +7,7 @@ public class Bullet {
     private static final int velocity = 10;
 
     public double[] getXY() {
-        return new double[] {x, y};
+        return new double[] {x+5*Math.cos(angle), y+5*Math.sin(angle), x-5*Math.cos(angle), y-5*Math.sin(angle)};
     }
     public void move() {
         x += velocity * Math.cos(angle);
