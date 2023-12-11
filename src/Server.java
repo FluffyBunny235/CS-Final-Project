@@ -1,4 +1,5 @@
 //Server, Client, and Client Handler are all modified from
+//https://www.youtube.com/watch?v=gLfuZrrfKes&ab_channel=WittCode
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -6,10 +7,6 @@ import java.net.Socket;
 public class Server {
 
     private ServerSocket serverSocket;
-
-    public ServerSocket getServerSocket() {
-        return serverSocket;
-    }
     public Server(ServerSocket serverSocket) {
         this.serverSocket = serverSocket;
     }

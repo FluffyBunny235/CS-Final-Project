@@ -18,23 +18,30 @@ public class Client {
             closeEverything(socket, bufferedReader, bufferedWriter);
         }
     }
-    public void sendMessage(String message, char character) {
+    public void sendMessage(char character) {
         try{
-            bufferedWriter.write(username + " " + character + ":" + message);
+            bufferedWriter.write( username + " " +character);
             bufferedWriter.newLine();
             bufferedWriter.flush();
         } catch( IOException e) {
             closeEverything(socket, bufferedReader, bufferedWriter);
         }
-    }
-    public void startMessage(char character) {
-        try {
-            bufferedWriter.write(username + " " +character);
-            bufferedWriter.newLine();
-            bufferedWriter.flush();
-        } catch( IOException e) {
-            closeEverything(socket, bufferedReader, bufferedWriter);
-        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (socket.isConnected()) {
+                    if (Game.sendCommands.isEmpty()) {continue;}
+                    String messageToSend = Game.sendCommands.removeFirst();
+                    try {
+                    bufferedWriter.write(username + " " + character + ": " + messageToSend);
+                    bufferedWriter.newLine();
+                    bufferedWriter.flush();
+                    } catch( IOException e) {
+                        closeEverything(socket, bufferedReader, bufferedWriter);
+                    }
+                }
+            }
+        }).start();
     }
     public void listenForMessage() {
         new Thread(new Runnable(){
@@ -45,6 +52,7 @@ public class Client {
                     try {
                         messageFromChat = bufferedReader.readLine();
                         Game.commands.addLast(messageFromChat);
+                        System.out.println(Game.commands.isEmpty());
                     } catch (IOException e) {
                         closeEverything(socket, bufferedReader, bufferedWriter);
                     }

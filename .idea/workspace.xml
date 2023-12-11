@@ -1,16 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="fdff2427-04fa-42ba-bbd3-82340846d60c" name="Changes" comment="12/8/23">
-      <change afterPath="$PROJECT_DIR$/src/A_Reverse.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/C_Reverse.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/GUI.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/GUI_Panel.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Keyboard.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/M_Reverse.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/S_Reverse.png" afterDir="false" />
+    <list default="true" id="fdff2427-04fa-42ba-bbd3-82340846d60c" name="Changes" comment="Imported new images so the character turns with user input. Also added user input and the game loop and GUI. Started on collisions">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Bullet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Bullet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ClientHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ClientHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GUI_Panel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/GUI_Panel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Game.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Player.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Server.java" afterDir="false" />
@@ -103,7 +98,14 @@
       <option name="project" value="LOCAL" />
       <updated>1702076003312</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Imported new images so the character turns with user input. Also added user input and the game loop and GUI. Started on collisions">
+      <created>1702194467368</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1702194467368</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -122,6 +124,7 @@
       <path value="$PROJECT_DIR$" />
     </ignored-roots>
     <MESSAGE value="12/8/23" />
-    <option name="LAST_COMMIT_MESSAGE" value="12/8/23" />
+    <MESSAGE value="Imported new images so the character turns with user input. Also added user input and the game loop and GUI. Started on collisions" />
+    <option name="LAST_COMMIT_MESSAGE" value="Imported new images so the character turns with user input. Also added user input and the game loop and GUI. Started on collisions" />
   </component>
 </project>

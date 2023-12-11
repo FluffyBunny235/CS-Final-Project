@@ -27,16 +27,19 @@ public class GUI_Panel extends JPanel implements Runnable{
         while (gameThread != null) { //as long as the thread exists, repeat:
             //update characters
             Game.runFrame();
-            if (kb.jump) {Game.user.jump();}
-            if (kb.right) {Game.user.right();}
-            else if (kb.left) {Game.user.left();}
-            if (kb.ability) {Game.user.ability();}
+            if (Game.user != null) {
+                if (kb.jump) {Game.user.jump();}
+                if (kb.right) {Game.user.right();}
+                else if (kb.left) {Game.user.left();}
+                if (kb.ability) {Game.user.ability();}
+            }
             //update screen
             repaint();
             try {
                 double remainingTime = nextDraw - System.nanoTime();
                 if (remainingTime < 0) {
                     nextDraw += drawTime;
+                    System.out.println("Frame Drop");
                     continue;
                 }
                 Thread.sleep((long)(remainingTime/1000000));
@@ -61,6 +64,8 @@ public class GUI_Panel extends JPanel implements Runnable{
         for (Map.Entry<String, Player> e : Game.players.entrySet()) {
             graphics2D.drawImage(e.getValue().getImage(), (int)e.getValue().getXY()[0], (int)e.getValue().getXY()[1], null);
         }
+        if (Game.user != null) {graphics2D.drawString("Health: " + Game.user.health, 500, 350);}
+        else {graphics2D.drawString("Health: 0", 500, 350);}
         graphics2D.dispose();
     }
 }

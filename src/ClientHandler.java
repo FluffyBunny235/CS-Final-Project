@@ -16,7 +16,8 @@ public class ClientHandler implements Runnable{
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.username = bufferedReader.readLine();
             clientHandlers.add(this);
-            broadcastMessage("Server: " + username + " has joined");
+            broadcastMessage("new " + username);
+            sendUsers();
         } catch (IOException e) {
             closeEverything(socket, bufferedReader, bufferedWriter);
         }
@@ -44,14 +45,30 @@ public class ClientHandler implements Runnable{
                     clientHandler.bufferedWriter.newLine();
                     clientHandler.bufferedWriter.flush();
                 }
-            } catch (IOException e) {
+            } catch (IOException | NullPointerException e) {
                 closeEverything(socket, bufferedReader, bufferedWriter);
+            }
+        }
+    }
+    public void broadcastMessageTo(String messageToSend, ClientHandler recipient) {
+        try {
+            recipient.bufferedWriter.write(messageToSend);
+            recipient.bufferedWriter.newLine();
+            recipient.bufferedWriter.flush();
+        } catch (IOException | NullPointerException e) {
+            closeEverything(socket, bufferedReader, bufferedWriter);
+        }
+    }
+    public void sendUsers() {
+        for (ClientHandler ch : clientHandlers) {
+            if (ch!=this) {
+                broadcastMessageTo("new "+ ch.username, this);
             }
         }
     }
     public void removeClientHandler() {
         clientHandlers.remove(this);
-        broadcastMessage("SERVER: " + username + " has left the chat.");
+        broadcastMessage(username + " has left.");
     }
     public void closeEverything(Socket socket, BufferedReader bufferedReader, BufferedWriter bufferedWriter) {
         removeClientHandler();

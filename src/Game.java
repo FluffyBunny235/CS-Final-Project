@@ -8,18 +8,19 @@ public class Game {
     public static HashSet<Bullet> bullets = new HashSet<>();
     public static HashMap<String, Player> players = new HashMap<>();
     public static ArrayDeque<String> commands = new ArrayDeque<>();
+    public static ArrayDeque<String> sendCommands = new ArrayDeque<>();
     public static Client client;
     public static Player user;
     public static void main(String[] args) throws IOException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter a username: ");
-        String username = scanner.nextLine();
+        String username = scanner.nextLine().replaceAll(" ", "_");
         System.out.println("Which character do you want to be?");
         char character = scanner.nextLine().toUpperCase().charAt(0);
         Socket socket = new Socket("localhost", 1452);
         client = new Client(socket, username);
         client.listenForMessage();
-        client.startMessage(character);
+        client.sendMessage(character);
         user = new Player(500,350,character, username);
         players.put(username, user);
         runCommand();
@@ -38,8 +39,12 @@ public class Game {
             @Override
             public void run() {
                 while (client.socket.isConnected()) {
+                    System.out.println("NAY");
                     if (commands.isEmpty()) {continue;}
+                    System.out.println("YAY");
                     String command = commands.removeFirst();
+                    System.out.println("Command: " + command);
+                    System.exit(10);
                     if (command.startsWith("new")) {
                         String[] words = command.split(" ");
                         players.put(words[1], new Player(500, 350, words[2].charAt(0), words[1]));

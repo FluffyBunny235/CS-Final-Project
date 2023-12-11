@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class Player {
-    private static final double gravity = 1.8;
+    private static final double gravity = 1.3;
     private static final double friction = 1.5;
     // characters: cowboy (C), military (M), alien (A), snowman (S)
     private double x;
@@ -16,7 +16,7 @@ public class Player {
     private final char character;
     private int shotCoolDown;
     private String user;
-    private int health = 100;
+    public int health = 100;
     public Player(double x, double y, char character, String user) {
         this.user = user;
         this.x = x;
@@ -31,6 +31,7 @@ public class Player {
     }
 
     public void move() {
+        if (x > 1000 || x < -60) {takeDamage(1);}
         x += xVel;
         if (shotCoolDown > 0) {shotCoolDown-=1;}
         xVel/=friction;
@@ -46,6 +47,7 @@ public class Player {
         else {
             yVel += gravity;
             y += yVel;
+            isOnGround();
         }
     }
     public void right() {
@@ -56,7 +58,7 @@ public class Player {
     }
     public void jump() {
         if (isOnGround()) {
-            yVel = -20;
+            yVel = -15;
         }
     }
     public void ability() {
@@ -101,6 +103,7 @@ public class Player {
     }
     public void die() {
         Game.players.remove(this);
+        Game.user = null;
     }
     public double[] getXY() {
         return new double[] {x ,y};
