@@ -1,9 +1,11 @@
+import java.util.HashMap;
 import java.util.Map;
 
 public class Bullet {
     private double angle;
     private double x;
     private double y;
+    private Player p;
     private static final int velocity = 10;
 
     public double[] getXY() {
@@ -12,7 +14,9 @@ public class Bullet {
     public void move() {
         x += velocity * Math.cos(angle);
         y += velocity * Math.sin(angle);
-        for (Map.Entry<String, Player> e : Game.players.entrySet()) {
+        HashMap<String, Player> playersCopy = new HashMap<>(Game.players);
+        for (Map.Entry<String, Player> e : playersCopy.entrySet()) {
+            if (e.getValue() == p) {continue;}
             double[] XY = e.getValue().getXY();
             if (x > XY[0] && x < XY[0]+40 && y > XY[1] && y < XY[1]+60) {
                 e.getValue().takeDamage(25);
@@ -23,7 +27,10 @@ public class Bullet {
             Game.bullets.remove(this);
         }
     }
-    public Bullet(double angle) {
+    public Bullet(double x, double y, double angle, Player p) {
+        this.x = x;
+        this.y = y;
         this.angle = angle;
+        this.p = p;
     }
 }

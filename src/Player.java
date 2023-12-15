@@ -65,7 +65,25 @@ public class Player {
 
     }
     public void shoot(double angle) {
-        Game.bullets.add(new Bullet(angle));
+        if (xVel > 0) {
+            Game.bullets.add(new Bullet(this.x + 41, this.y + 30, angle, Game.players.get(user)));
+        }
+        else {
+            Game.bullets.add(new Bullet(this.x-1, this.y + 30, angle, Game.players.get(user)));
+        }
+        shotCoolDown = 10;
+    }
+    public void shoot(int x, int y) {
+        if (shotCoolDown != 0) {return;}
+        double angle = Math.atan((y-(this.y+30))/(x-(this.x + 20)));
+        if (this.x > x) {angle+=3.141592;}
+        Game.sendCommands.add(angle + "r");
+        if (xVel > 0) {
+            Game.bullets.add(new Bullet(this.x + 41, this.y + 30, angle, Game.players.get(user)));
+        }
+        else {
+            Game.bullets.add(new Bullet(this.x-1, this.y + 30, angle, Game.players.get(user)));
+        }
         shotCoolDown = 10;
     }
     private boolean isOnGround(){
@@ -102,8 +120,17 @@ public class Player {
         }
     }
     public void die() {
-        Game.players.remove(this);
-        Game.user = null;
+        Game.players.remove(this.user);
+        if (Game.user == this) {
+            Game.sendCommands.add("has left.");
+            Game.user = null;
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.exit(10);
+        }
     }
     public double[] getXY() {
         return new double[] {x ,y};
@@ -113,5 +140,23 @@ public class Player {
             return image;
         }
         return reverseImage;
+    }
+    public void setX(double x) {
+        this.x = x;
+    }
+    public void setY(double y) {
+        this.y = y;
+    }
+    public void setXVel(double xVel) {
+        this.xVel = xVel;
+    }
+    public void setYVel(double yVel) {
+        this.yVel = yVel;
+    }
+    public double getXVel() {
+        return xVel;
+    }
+    public double getYVel() {
+        return yVel;
     }
 }

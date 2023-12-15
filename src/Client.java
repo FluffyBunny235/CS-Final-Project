@@ -6,7 +6,7 @@ public class Client {
     public Socket socket;
     public BufferedWriter bufferedWriter;
     public BufferedReader bufferedReader;
-    private String username;
+    public String username;
 
     public Client(Socket socket, String username) {
         try {
@@ -14,13 +14,14 @@ public class Client {
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.username = username;
+            System.out.println("Client ID: " + username);
         } catch( IOException e) {
             closeEverything(socket, bufferedReader, bufferedWriter);
         }
     }
-    public void sendMessage(char character) {
+    public void sendMessage(char character, double x, double y) {
         try{
-            bufferedWriter.write( username + " " +character);
+            bufferedWriter.write( username + " " +character + " " + x + " " + y);
             bufferedWriter.newLine();
             bufferedWriter.flush();
         } catch( IOException e) {
@@ -30,12 +31,19 @@ public class Client {
             @Override
             public void run() {
                 while (socket.isConnected()) {
-                    if (Game.sendCommands.isEmpty()) {continue;}
+                    if (Game.sendCommands.isEmpty()) {
+                        try {
+                            Thread.sleep(1);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                        continue;
+                    }
                     String messageToSend = Game.sendCommands.removeFirst();
                     try {
-                    bufferedWriter.write(username + " " + character + ": " + messageToSend);
-                    bufferedWriter.newLine();
-                    bufferedWriter.flush();
+                        bufferedWriter.write(username + " " + character + ": " + messageToSend);
+                        bufferedWriter.newLine();
+                        bufferedWriter.flush();
                     } catch( IOException e) {
                         closeEverything(socket, bufferedReader, bufferedWriter);
                     }
@@ -51,8 +59,17 @@ public class Client {
                 while (socket.isConnected()) {
                     try {
                         messageFromChat = bufferedReader.readLine();
+                        if (messageFromChat == null) {continue;}
+                        if (messageFromChat.equals("Send XY")) {
+                            try {
+                                bufferedWriter.write("XY"+Game.players.get(username).getXY()[0]+" "+Game.players.get(username).getXY()[1]);
+                                bufferedWriter.newLine();
+                                bufferedWriter.flush();
+                            } catch( IOException e) {
+                                closeEverything(socket, bufferedReader, bufferedWriter);
+                            }
+                        }
                         Game.commands.addLast(messageFromChat);
-                        System.out.println(Game.commands.isEmpty());
                     } catch (IOException e) {
                         closeEverything(socket, bufferedReader, bufferedWriter);
                     }

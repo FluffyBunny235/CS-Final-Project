@@ -17,20 +17,22 @@ public class Game {
         String username = scanner.nextLine().replaceAll(" ", "_");
         System.out.println("Which character do you want to be?");
         char character = scanner.nextLine().toUpperCase().charAt(0);
+        user = new Player(500,350,character, username);
+        players.put(username, user);
         Socket socket = new Socket("localhost", 1452);
         client = new Client(socket, username);
         client.listenForMessage();
-        client.sendMessage(character);
-        user = new Player(500,350,character, username);
-        players.put(username, user);
+        client.sendMessage(character, 500, 350);
         runCommand();
         new GUI();
     }
     public static void runFrame() {
-        for (Bullet b : bullets) {
+        HashSet<Bullet> bulletsCopy = new HashSet<>(bullets);
+        HashMap<String, Player> playersCopy = new HashMap<>(players);
+        for (Bullet b : bulletsCopy) {
             b.move();
         }
-        for (Map.Entry<String, Player> e : Game.players.entrySet()) {
+        for (Map.Entry<String, Player> e : playersCopy.entrySet()) {
             e.getValue().move();
         }
     }
@@ -39,15 +41,26 @@ public class Game {
             @Override
             public void run() {
                 while (client.socket.isConnected()) {
-                    System.out.println("NAY");
-                    if (commands.isEmpty()) {continue;}
-                    System.out.println("YAY");
+                    if (commands.isEmpty()) {
+                        try {
+                            Thread.sleep(1);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                        continue;
+                    }
                     String command = commands.removeFirst();
-                    System.out.println("Command: " + command);
-                    System.exit(10);
+                    //System.out.println("Command: " + command);
                     if (command.startsWith("new")) {
                         String[] words = command.split(" ");
-                        players.put(words[1], new Player(500, 350, words[2].charAt(0), words[1]));
+                        players.put(words[1], new Player(Double.parseDouble(words[3]), Double.parseDouble(words[4]), words[2].charAt(0), words[1]));
+                    }
+                    else if (command.contains("Set")) {
+                        String[] words = command.split(" ");
+                        players.get(words[0]).setX(Double.parseDouble(words[3]));
+                        players.get(words[0]).setY(Double.parseDouble(words[4]));
+                        players.get(words[0]).setXVel(Double.parseDouble(words[5]));
+                        players.get(words[0]).setYVel(Double.parseDouble(words[6]));
                     }
                     else if (command.endsWith("d")) { //move right
                         players.get(command.substring(0, command.indexOf(" "))).right();
@@ -58,8 +71,14 @@ public class Game {
                     else if (command.endsWith("w")) { //jump
                         players.get(command.substring(0, command.indexOf(" "))).jump();
                     }
+                    else if (command.endsWith("s")) { //ability
+                        players.get(command.substring(0, command.indexOf(" "))).ability();
+                    }
                     else if (command.endsWith("r")) { //shoot radians
-                        players.get(command.substring(0, command.indexOf(" "))).shoot(Double.parseDouble(command.substring(command.indexOf(" ")+1, command.length()-1)));
+                        players.get(command.substring(0, command.indexOf(" "))).shoot(Double.parseDouble(command.substring(command.indexOf(":")+2, command.length()-1)));
+                    }
+                    else if (command.endsWith("left.")) {
+                        players.remove(command.split(" ")[0]);
                     }
                 }
             }

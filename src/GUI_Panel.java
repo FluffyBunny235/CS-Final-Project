@@ -10,11 +10,14 @@ public class GUI_Panel extends JPanel implements Runnable{
     final int WIDTH = 1000;
     Thread gameThread;
     Keyboard kb;
+    ShootDetector sd;
     public GUI_Panel() {
         this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         this.setDoubleBuffered(true);
         kb = new Keyboard();
+        sd = new ShootDetector();
         this.addKeyListener(kb);
+        this.addMouseListener(sd);
         this.setFocusable(true);
         gameThread = new Thread(this);
         gameThread.start();
@@ -24,14 +27,32 @@ public class GUI_Panel extends JPanel implements Runnable{
     public void run() {
         double drawTime = 1000000000.0/60; //a lot of nano seconds, but 1/60th of a second
         double nextDraw = System.nanoTime() + drawTime;
+        int frame = 0;
         while (gameThread != null) { //as long as the thread exists, repeat:
+            if (frame == 20) {
+                Game.sendCommands.addLast("Set " + Game.user.getXY()[0] + " " + Game.user.getXY()[1] +" "+ Game.user.getXVel() + " " + Game.user.getYVel());
+                frame = 0;
+            }
+            frame++;
             //update characters
             Game.runFrame();
             if (Game.user != null) {
-                if (kb.jump) {Game.user.jump();}
-                if (kb.right) {Game.user.right();}
-                else if (kb.left) {Game.user.left();}
-                if (kb.ability) {Game.user.ability();}
+                if (kb.jump) {
+                    Game.user.jump();
+                    Game.sendCommands.addLast(" w");
+                }
+                if (kb.right) {
+                    Game.user.right();
+                    Game.sendCommands.addLast(" d");
+                }
+                else if (kb.left) {
+                    Game.user.left();
+                    Game.sendCommands.addLast(" a");
+                }
+                if (kb.ability) {
+                    Game.user.ability();
+                    Game.sendCommands.addLast(" s");
+                }
             }
             //update screen
             repaint();

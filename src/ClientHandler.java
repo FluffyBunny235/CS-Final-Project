@@ -4,10 +4,12 @@ import java.util.ArrayList;
 
 public class ClientHandler implements Runnable{
     public static ArrayList<ClientHandler> clientHandlers = new ArrayList<>();
-    private Socket socket;
+    public Socket socket;
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
-    private String username;
+    public String username;
+    public boolean ready = false;
+    public String recentXY = "";
 
     public ClientHandler(Socket socket) {
         try {
@@ -17,6 +19,7 @@ public class ClientHandler implements Runnable{
             this.username = bufferedReader.readLine();
             clientHandlers.add(this);
             broadcastMessage("new " + username);
+            username = username.split(" ")[0] +" " +username.split(" ")[1];
             sendUsers();
         } catch (IOException e) {
             closeEverything(socket, bufferedReader, bufferedWriter);
@@ -29,16 +32,29 @@ public class ClientHandler implements Runnable{
         while(socket.isConnected()) {
             try {
                 messageFromClient = bufferedReader.readLine();
-                broadcastMessage(messageFromClient);
+                if (messageFromClient == null) {continue;}
+                if (messageFromClient.startsWith("XY")) {
+                    recentXY = messageFromClient.substring(2);
+                    ready = true;
+                }
+                else if (messageFromClient.endsWith("has left")) {
+                    broadcastMessage(messageFromClient);
+                    closeEverything(socket, bufferedReader, bufferedWriter);
+                }
+                else {
+                    broadcastMessage(messageFromClient);
+                }
             } catch (IOException e) {
                 closeEverything(socket, bufferedReader, bufferedWriter);
                 break;
             }
         }
+        closeEverything(socket, bufferedReader, bufferedWriter);
     }
 
     public void broadcastMessage(String messageToSend) {
-        for (ClientHandler clientHandler : clientHandlers) {
+        ArrayList<ClientHandler> clientHandlers1 = new ArrayList<>(clientHandlers);
+        for (ClientHandler clientHandler : clientHandlers1) {
             try {
                 if (!clientHandler.username.equals(this.username)) {
                     clientHandler.bufferedWriter.write(messageToSend);
@@ -46,7 +62,8 @@ public class ClientHandler implements Runnable{
                     clientHandler.bufferedWriter.flush();
                 }
             } catch (IOException | NullPointerException e) {
-                closeEverything(socket, bufferedReader, bufferedWriter);
+                System.out.println("Broadcast failed: "+ messageToSend + " To: " + clientHandler.username);
+                clientHandlers.remove(clientHandler);
             }
         }
     }
@@ -62,13 +79,13 @@ public class ClientHandler implements Runnable{
     public void sendUsers() {
         for (ClientHandler ch : clientHandlers) {
             if (ch!=this) {
-                broadcastMessageTo("new "+ ch.username, this);
+                broadcastMessageTo("new "+ ch.username + " " + ch.getXY(), this);
             }
         }
     }
     public void removeClientHandler() {
-        clientHandlers.remove(this);
         broadcastMessage(username + " has left.");
+        clientHandlers.remove(this);
     }
     public void closeEverything(Socket socket, BufferedReader bufferedReader, BufferedWriter bufferedWriter) {
         removeClientHandler();
@@ -85,5 +102,17 @@ public class ClientHandler implements Runnable{
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    public String getXY () {
+        broadcastMessageTo("Send XY", this);
+        while (!ready) {
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        ready = false;
+        return recentXY;
     }
 }
