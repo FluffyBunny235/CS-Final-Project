@@ -27,27 +27,18 @@ public class GUI_Panel extends JPanel implements Runnable{
     public void run() {
         double drawTime = 1000000000.0/60; //a lot of nano seconds, but 1/60th of a second
         double nextDraw = System.nanoTime() + drawTime;
-        int frame = 0;
         while (gameThread != null) { //as long as the thread exists, repeat:
-            if (frame == 20) {
-                Game.sendCommands.addLast("Set " + Game.user.getXY()[0] + " " + Game.user.getXY()[1] +" "+ Game.user.getXVel() + " " + Game.user.getYVel());
-                frame = 0;
-            }
-            frame++;
             //update characters
             Game.runFrame();
             if (Game.user != null) {
                 if (kb.jump) {
                     Game.user.jump();
-                    Game.sendCommands.addLast(" w");
                 }
                 if (kb.right) {
                     Game.user.right();
-                    Game.sendCommands.addLast(" d");
                 }
                 else if (kb.left) {
                     Game.user.left();
-                    Game.sendCommands.addLast(" a");
                 }
                 if (kb.ability) {
                     Game.user.ability();
@@ -85,8 +76,16 @@ public class GUI_Panel extends JPanel implements Runnable{
         for (Map.Entry<String, Player> e : Game.players.entrySet()) {
             graphics2D.drawImage(e.getValue().getImage(), (int)e.getValue().getXY()[0], (int)e.getValue().getXY()[1], null);
         }
-        if (Game.user != null) {graphics2D.drawString("Health: " + Game.user.health, 500, 350);}
-        else {graphics2D.drawString("Health: 0", 500, 350);}
+        graphics2D.setColor(Color.BLACK);
+        graphics2D.setFont(new Font("Bungee", Font.BOLD, 20));
+        if (Game.user != null) {graphics2D.drawString("Health: " + Game.user.health, 5, 25);}
+        else {graphics2D.drawString("Health: 0", 5, 25);}
+        if (Game.user != null && Game.user.abilityActive) {
+            graphics2D.drawString("Ability Left: " + (Game.user.abilityTimeLeft/60), 5, 50);
+        }
+        else if (Game.user != null) {
+            graphics2D.drawString("Ability Cooldown: " + (Game.user.newAbilityCountdown/60), 5, 50);
+        }
         graphics2D.dispose();
     }
 }

@@ -15,8 +15,11 @@ public class Player {
     private double yVel=0;
     private final char character;
     private int shotCoolDown;
-    private String user;
+    public String user;
     public int health = 100;
+    public boolean abilityActive = false;
+    public int abilityTimeLeft = 0; // time left on current ability
+    public int newAbilityCountdown = 600; // how long until next ability
     public Player(double x, double y, char character, String user) {
         this.user = user;
         this.x = x;
@@ -31,8 +34,12 @@ public class Player {
     }
 
     public void move() {
+        if (abilityTimeLeft > 0) {abilityTimeLeft--;}
+        else {abilityActive = false;}
+        if (newAbilityCountdown > 0) {newAbilityCountdown--;}
         if (x > 1000 || x < -60) {takeDamage(1);}
         x += xVel;
+        if (Game.inObstacle((int)x, (int)x+40, (int)y+60, (int)y) > 0) {x-=xVel;}
         if (shotCoolDown > 0) {shotCoolDown-=1;}
         xVel/=friction;
         if (xVel < 0.05 && xVel > 0) {
@@ -46,8 +53,21 @@ public class Player {
         }
         else {
             yVel += gravity;
+            if (yVel < 0 && isOnLadder()) {//going up ladder
+                yVel = -5;
+            }
+            if (yVel > 0 && isOnLadder()) {
+                yVel = 5;
+            }
             y += yVel;
             isOnGround();
+        }
+        if (isInWell()) {
+            x = 432;
+            y = 0;
+        }
+        if (Game.user == this) {
+            Game.sendCommands.addLast("Set " + x + " " + y +" "+ xVel + " " + yVel);
         }
     }
     public void right() {
@@ -62,7 +82,9 @@ public class Player {
         }
     }
     public void ability() {
-
+        abilityActive = true;
+        abilityTimeLeft = 300; //5 seconds
+        newAbilityCountdown = 1800; //30 seconds
     }
     public void shoot(double angle) {
         if (xVel > 0) {
@@ -71,12 +93,13 @@ public class Player {
         else {
             Game.bullets.add(new Bullet(this.x-1, this.y + 30, angle, Game.players.get(user)));
         }
-        shotCoolDown = 10;
     }
     public void shoot(int x, int y) {
         if (shotCoolDown != 0) {return;}
         double angle = Math.atan((y-(this.y+30))/(x-(this.x + 20)));
-        if (this.x > x) {angle+=3.141592;}
+        int xAdjustment = 0;
+        if (xVel > 0) {xAdjustment = 40;}
+        if (this.x+xAdjustment > x) {angle+=3.141592;}
         Game.sendCommands.add(angle + "r");
         if (xVel > 0) {
             Game.bullets.add(new Bullet(this.x + 41, this.y + 30, angle, Game.players.get(user)));
@@ -84,7 +107,9 @@ public class Player {
         else {
             Game.bullets.add(new Bullet(this.x-1, this.y + 30, angle, Game.players.get(user)));
         }
-        shotCoolDown = 10;
+        if (character != 'C' || !abilityActive) {
+            shotCoolDown = 40;
+        }
     }
     private boolean isOnGround(){
         double yBottom = y+60;
@@ -93,9 +118,14 @@ public class Player {
             y = 525;
             return true;
         }
-        else if (x < 548 && xRight > 357 && yBottom >= 376 && yBottom <= 430) {
+        else if (x < 548 && xRight > 357 && yBottom >= 376 && yBottom <= 430) { //tire swing
             y = 317;
             return true;
+        }
+        else if (x < 548 && xRight > 357 && y >= 376 && y <= 430) { //tire swing
+            y = 431;
+            yVel = 0;
+            return false;
         }
         else if (x > 260 && x < 333 && yBottom > 506){
             y = 447;
@@ -108,10 +138,10 @@ public class Player {
         return false;
     }
     public boolean isOnLadder(){
-        return false;
+        return Game.inObstacle((int)x, (int)x+40, (int)y+60, (int)y)==-1;
     }
-    public boolean isOnWell() {
-        return false;
+    public boolean isInWell() {
+        return Game.inObstacle((int)x, (int)x+40, (int)y+60, (int)y)==2;
     }
     public void takeDamage(int damage) {
         health -= damage;

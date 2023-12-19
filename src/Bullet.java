@@ -19,11 +19,11 @@ public class Bullet {
             if (e.getValue() == p) {continue;}
             double[] XY = e.getValue().getXY();
             if (x > XY[0] && x < XY[0]+40 && y > XY[1] && y < XY[1]+60) {
-                e.getValue().takeDamage(25);
+                e.getValue().takeDamage(20);
                 Game.bullets.remove(this);
             }
         }
-        if (x > 1000 || x < 0 || y < 0 || y>590) {
+        if (x > 1000 || x < 0 || y < 0 || y>590 || Game.inObstacle((int)getXY()[0], (int)getXY()[2], (int)getXY()[1], (int)getXY()[3]) > 0) {
             Game.bullets.remove(this);
         }
     }
